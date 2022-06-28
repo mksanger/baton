@@ -203,15 +203,16 @@ json_t *list_checksum(rcComm_t *conn, rodsPath_t *rods_path,
     }
 
     query_format_in_t obj_format =
-        { .num_columns = 3,
+        { .num_columns = 4,
           .columns     = { COL_COLL_NAME, COL_DATA_NAME,
-                           COL_D_DATA_CHECKSUM },
+                           COL_D_DATA_CHECKSUM, COL_D_REPL_STATUS },
           .labels      = { JSON_COLLECTION_KEY, JSON_DATA_OBJECT_KEY,
-                           JSON_CHECKSUM_KEY } };
+                           JSON_CHECKSUM_KEY, JSON_REPLICATE_STATUS_KEY } };
 
     query_in = make_query_input(SEARCH_MAX_ROWS, obj_format.num_columns,
                                 obj_format.columns);
     query_in = prepare_obj_list(query_in, rods_path, NULL);
+    query_in = limit_to_good_repl(query_in);
 
     results = do_query(conn, query_in, obj_format.labels, error);
     if (error->code != 0) goto error;
